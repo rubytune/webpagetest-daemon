@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+lib = File.expand_path("../../lib", __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+require 'web_page_test'
+
+batch = WebPageTest::Batch.new
+batch.option_parser.parse(ARGV).each do |url|
+  puts batch.run(url)
+end
+
