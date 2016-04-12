@@ -13,7 +13,7 @@ module WebPageTestDaemon
       if tests.all?(&:complete?)
         report(job, tests)
       else
-        Resque.enqueue_in(30.seconds, StatusCheckJob, job)
+        Resque.enqueue_in(30, StatusCheckJob, job)
       end
     end
 

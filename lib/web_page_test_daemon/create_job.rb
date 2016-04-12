@@ -20,7 +20,7 @@ module WebPageTestDaemon
 
       job["test_ids"] = test_ids
 
-      Resque.enqueue_in(30.seconds, StatusCheckJob, job)
+      Resque.enqueue_in(30, StatusCheckJob, job)
     end
   end
 end
