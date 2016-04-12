@@ -7,4 +7,6 @@ gem 'rake'
 
 gem 'octokit'
 
+gem 'rspec'
+
 gem 'pry'
