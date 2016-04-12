@@ -1,8 +1,6 @@
 
 require 'erb'
 
-require 'octokit'
-
 module WebPageTest
   class Summary
     def self.create_gist(test)
@@ -17,15 +15,11 @@ Repeat View (<%= sprintf('%.2fs', repeat_view.load_time/1000.0) %>) | <img src="
 EOF
 
       b = test.instance_eval{ binding }
+      ERB.new(erb).result(b)
+    end
 
-      github = Octokit::Client.new
-      gist = github.create_gist(
-        files: {
-          "webpagetest-#{test.id}.md" => { content: ERB.new(erb).result(b) }
-        }
-      )
-
-      gist[:html_url]
+    def self.create_comment(tests)
+      tests.map{ |test| create_gist(test) }.join("\n\n")
     end
   end
 end

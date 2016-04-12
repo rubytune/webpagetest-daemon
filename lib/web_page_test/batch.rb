@@ -2,6 +2,8 @@
 require 'optparse'
 require 'net/http'
 
+require 'octokit'
+
 require 'web_page_test/test'
 require 'web_page_test/summary'
 
@@ -77,7 +79,17 @@ module WebPageTest
 
         opts.on('--gist ID') do |id|
           test = Test.new(server, id)
-          puts WebPageTest::Summary.create_gist(test)
+
+          gist_content = Summary.create_gist(test)
+
+          github = Octokit::Client.new(access_token: ENV["GITHUB_ACCESS_TOKEN"])
+          gist = github.create_gist(
+            files: {
+              "webpagetest-#{test.id}.md" => { content: gist_content }
+            }
+          )
+
+          puts gist[:html_url]
         end
       end
     end
