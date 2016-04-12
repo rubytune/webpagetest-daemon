@@ -4,6 +4,7 @@ require "json"
 require "openssl"
 
 require "web_page_test_daemon/github_comment"
+require "web_page_test_daemon/create_job"
 
 module WebPageTestDaemon
   class App < Sinatra::Base
