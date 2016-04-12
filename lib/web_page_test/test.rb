@@ -32,6 +32,10 @@ module WebPageTest
       @repeat_view ||= view_data(api_data['data']['runs']['1']['repeatView'])
     end
 
+    def complete?
+      api_data["statusText"] == "Test Complete"
+    end
+
     protected
 
     def view_data(view)
