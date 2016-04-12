@@ -2,6 +2,7 @@
 require 'shellwords'
 
 require 'web_page_test'
+require 'web_page_test_daemon/status_check_job'
 
 module WebPageTestDaemon
   class CreateJob
