@@ -3,6 +3,8 @@ require "sinatra/base"
 require "json"
 require "openssl"
 
+require "web_page_test_daemon/github_comment"
+
 module WebPageTestDaemon
   class App < Sinatra::Base
     HMAC_DIGEST = OpenSSL::Digest::Digest.new('sha1')
