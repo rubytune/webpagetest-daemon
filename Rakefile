@@ -6,3 +6,4 @@ require "web_page_test_daemon/create_job"
 require "web_page_test_daemon/status_check_job"
 
 require 'resque/tasks'
+require 'resque/scheduler/tasks'
