@@ -36,7 +36,7 @@ module WebPageTestDaemon
     # issue_comment
     post "/comment" do
       if payload['issue'] && payload['issue'].key?('pull_request')
-        pull = stringify_keys pull_request(payload['issue']['pull_request']['url'])
+        pull = stringify_keys pull_request(payload['issue']['pull_request']['url']).to_h
       elsif payload['pull_request']
         pull = payload['pull_request']
       end
