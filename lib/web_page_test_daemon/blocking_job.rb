@@ -15,18 +15,25 @@ module WebPageTestDaemon
     def self.perform(job)
       webpagetest = WebPageTest::Batch.new
       args = Shellwords.shellsplit(job["arguments"])
-
       args << "--pingback" << pingback_url
+
+      warn("Running webpagetest with: #{args.inspect}")
+
       args << "--api-key" << ENV["WEBPAGETEST_API_KEY"]
       test_ids = webpagetest.option_parser.parse(args).map do |url|
-        webpagetest.run(url)
+        webpagetest.run(url).tap{ |id| warn("test_id: #{id.inspect}") }
       end
 
-      test_ids.size.times{ PINGBACK_READ.read(1) }
+      warn "Waiting for signals"
+      test_ids.size.times do |i|
+        PINGBACK_READ.read(1)
+        warn "App signaled #{i+1} tests completed"
+      end
 
       job["webpagetest_server"] = webpagetest.server
       job["test_ids"] = test_ids
 
+      warn "Enqueuing github comment job"
       Resque.enqueue(TestResultsJob, job)
     end
 
@@ -40,6 +47,7 @@ module WebPageTestDaemon
 
         post "/test_complete" do
           PINGBACK_WRITE.write("1")
+          warn "Pingback app received test complete message: #{params['id']}"
         end
       end.tap(&:run!)
     end
