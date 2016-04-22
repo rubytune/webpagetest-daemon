@@ -16,8 +16,8 @@ module WebPageTestDaemon
       webpagetest = WebPageTest::Batch.new
       args = Shellwords.shellsplit(job["arguments"])
 
-      webpagetest.api_key = ENV["WEBPAGETEST_API_KEY"]
-
+      args << "--pingback" << pingback_url
+      args << "--api-key" << ENV["WEBPAGETEST_API_KEY"]
       test_ids = webpagetest.option_parser.parse(args).map do |url|
         webpagetest.run(url)
       end
@@ -28,6 +28,10 @@ module WebPageTestDaemon
       job["test_ids"] = test_ids
 
       Resque.enqueue(TestResultsJob, job)
+    end
+
+    def self.pingback_url
+      "http://#{PINGBACK_HOST}:#{PINGBACK_PORT}/test_complete"
     end
 
     def self.pingback_app
