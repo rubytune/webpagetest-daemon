@@ -17,6 +17,11 @@ module WebPageTestDaemon
       args = Shellwords.shellsplit(job["arguments"])
       args << "--pingback" << pingback_url
 
+      unless @pingback_app
+        warn("Initializing pingback_app")
+        pingback_app
+      end
+
       warn("Running webpagetest with: #{args.inspect}")
 
       args << "--api-key" << ENV["WEBPAGETEST_API_KEY"]
