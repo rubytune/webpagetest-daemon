@@ -6,7 +6,7 @@ require 'web_page_test_daemon/test_results_job'
 
 module WebPageTestDaemon
   class BlockingJob
-    PINGBACK_HOST = ENV.fetch("PINGBACK_HOST")
+    PINGBACK_HOST = ENV["PINGBACK_HOST"]
     PINGBACK_PORT = ENV["PINGBACK_PORT"] || 8080
     PINGBACK_READ, PINGBACK_WRITE = IO.pipe
 
