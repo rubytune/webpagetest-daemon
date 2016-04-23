@@ -12,25 +12,33 @@ module WebPageTestDaemon
     @queue = :web_page_test_blocking_jobs
 
     def self.perform(job)
-      webpagetest = WebPageTest::Batch.new
       args = Shellwords.shellsplit(job["arguments"])
       args << "--pingback" << pingback_url
 
-      warn("Running webpagetest with: #{args.inspect}")
-
+      warn("webpagetest args: #{args.inspect}")
       args << "--api-key" << ENV["WEBPAGETEST_API_KEY"]
-      test_ids = webpagetest.option_parser.parse(args).map do |url|
-        webpagetest.run(url).tap{ |id| warn("test_id: #{id.inspect}") }
-      end
 
-      warn "Waiting for signals"
-      run_pingback_app(test_ids)
+      webpagetest = WebPageTest::Batch.new
+      urls = webpagetest.option_parser.parse(args)
+
+      test_ids = run_webpagetest(webpagetest, urls)
 
       job["webpagetest_server"] = webpagetest.server
       job["test_ids"] = test_ids
 
       warn "Enqueuing github comment job"
       Resque.enqueue(TestResultsJob, job)
+    end
+
+    def self.run_webpagetest(webpagetest, urls)
+      test_ids = urls.map do |url|
+        webpagetest.run(url).tap{ |id| warn("test_id: #{id.inspect}") }
+      end
+
+      warn "Waiting for signals"
+      run_pingback_app(test_ids)
+
+      test_ids
     end
 
     def self.pingback_url
