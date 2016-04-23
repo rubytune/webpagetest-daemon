@@ -8,7 +8,6 @@ module WebPageTestDaemon
   class BlockingJob
     PINGBACK_HOST = ENV["PINGBACK_HOST"]
     PINGBACK_PORT = ENV["PINGBACK_PORT"] || 8080
-    PINGBACK_READ, PINGBACK_WRITE = IO.pipe
 
     @queue = :web_page_test_blocking_jobs
 
@@ -16,11 +15,6 @@ module WebPageTestDaemon
       webpagetest = WebPageTest::Batch.new
       args = Shellwords.shellsplit(job["arguments"])
       args << "--pingback" << pingback_url
-
-      unless @pingback_app
-        warn("Initializing pingback_app")
-        pingback_app
-      end
 
       warn("Running webpagetest with: #{args.inspect}")
 
@@ -30,10 +24,7 @@ module WebPageTestDaemon
       end
 
       warn "Waiting for signals"
-      test_ids.size.times do |i|
-        PINGBACK_READ.read(1)
-        warn "App signaled #{i+1} tests completed"
-      end
+      run_pingback_app(test_ids)
 
       job["webpagetest_server"] = webpagetest.server
       job["test_ids"] = test_ids
@@ -46,15 +37,19 @@ module WebPageTestDaemon
       "http://#{PINGBACK_HOST}:#{PINGBACK_PORT}/test_complete"
     end
 
-    def self.pingback_app
-      @pingback_app ||= Sinatra.new do
+    def self.run_pingback_app(test_ids)
+      incomplete_tests = test_ids.dup
+
+      Sinatra.new do
+        set :lock, true
         set :port, PINGBACK_PORT
 
         post "/test_complete" do
-          PINGBACK_WRITE.write("1")
           warn "Pingback app received test complete message: #{params['id']}"
+          incomplete_tests.delete(params["id"])
+          stop! if incomplete_tests.empty?
         end
-      end.tap(&:run!)
+      end.run!
     end
   end
 end
