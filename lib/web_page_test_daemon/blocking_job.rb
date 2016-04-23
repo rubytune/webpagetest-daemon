@@ -40,7 +40,7 @@ module WebPageTestDaemon
     def self.run_pingback_app(test_ids)
       incomplete_tests = test_ids.dup
 
-      Sinatra.new do
+      app = Sinatra.new do
         set :lock, true
         set :bind, "0.0.0.0"
         set :port, PINGBACK_PORT
@@ -48,9 +48,11 @@ module WebPageTestDaemon
         get "/test_complete" do
           warn "Pingback app received test complete message: #{params['id']}"
           incomplete_tests.delete(params["id"])
-          stop! if incomplete_tests.empty?
+          app.stop! if incomplete_tests.empty?
         end
-      end.run!
+      end
+
+      app.run!
     end
   end
 end
