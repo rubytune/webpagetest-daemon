@@ -45,7 +45,7 @@ module WebPageTestDaemon
         set :bind, "0.0.0.0"
         set :port, PINGBACK_PORT
 
-        post "/test_complete" do
+        get "/test_complete" do
           warn "Pingback app received test complete message: #{params['id']}"
           incomplete_tests.delete(params["id"])
           stop! if incomplete_tests.empty?
