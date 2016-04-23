@@ -42,6 +42,7 @@ module WebPageTestDaemon
 
       Sinatra.new do
         set :lock, true
+        set :bind, "0.0.0.0"
         set :port, PINGBACK_PORT
 
         post "/test_complete" do
